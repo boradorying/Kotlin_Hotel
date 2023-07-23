@@ -1,14 +1,20 @@
 package com.example.myapplication
+
 import java.time.LocalDate
+import java.util.Random
 
 class Reservation(
     val name: String?,
     val phoneSuffix: String,
     val roomNumber: Int,
     val checkIn: Int,
-    val checkout: Int
+    val checkout: Int,
+    val initialMoney: Int,
+    val hotelReservationFee: Int
 )
+
 var reservationList = mutableListOf<Reservation>()
+
 class ReservationManager(private val reservationList: MutableList<Reservation>) {
     fun reserve() {
         println("휴대폰 뒷번호를 입력해주세요 (뒷 4자리)")
@@ -26,7 +32,8 @@ class ReservationManager(private val reservationList: MutableList<Reservation>) 
                 println("예약하실 방 호실를 입력해주세요 (100 ~ 999)")
                 var myRoomNumber = readLine()!!.toInt()
                 if (myRoomNumber in 100..999) {
-                    val existingReservations = reservationList.filter { it.roomNumber == myRoomNumber }
+                    val existingReservations =
+                        reservationList.filter { it.roomNumber == myRoomNumber }
                     if (existingReservations.isNotEmpty()) {
                         println("해당 호실은 다음 날짜에 예약되어 있습니다:")
                         for (reservation in existingReservations) {
@@ -50,9 +57,22 @@ class ReservationManager(private val reservationList: MutableList<Reservation>) 
                             println("해당 날짜에 이미 방이 예약되어 있습니다. 다시 입력해주세요.")
                         } else {
                             if (myCheckOutDate > myCheckInDate) {
-                                val newReservationList = Reservation(myName, myPhoneSuffix, myRoomNumber, myCheckInDate, myCheckOutDate)
-                                reservationList.add(newReservationList)
+                                val random = Random()
+                                val initialMoney = random.nextInt(900000) + 100000
+                                val hotelReservationFee = 50000 // 호텔 예약비
+                                val newReservation = Reservation(
+                                    myName,
+                                    myPhoneSuffix,
+                                    myRoomNumber,
+                                    myCheckInDate,
+                                    myCheckOutDate,
+                                    initialMoney,
+                                    hotelReservationFee
+                                )
+                                reservationList.add(newReservation)
                                 println("예약이 완료되었습니다.")
+                                println("나의 초기머니: ${initialMoney}원")
+                                println("호텔 예약비로 인해 빠져나간 금액: ${hotelReservationFee}원")
                             } else {
                                 println("올바른 체크아웃 날짜를 입력해주세요.")
                             }
@@ -77,6 +97,7 @@ class ReservationManager(private val reservationList: MutableList<Reservation>) 
             }
         }
     }
+
     fun sortedReservationList() {
         if (reservationList.isEmpty()) {
             println("예약된 내역이 없습니다.")
@@ -89,7 +110,21 @@ class ReservationManager(private val reservationList: MutableList<Reservation>) 
         }
     }
 
-
-
-
+    fun searchReservationList() {
+        println("조회 하실 휴대폰 뒷번호를 입력하세요")
+        var searchPhoneSuffix = readLine()!!.trim()
+        var searchResult = reservationList.filter { it.phoneSuffix == searchPhoneSuffix }
+        if (searchResult.isEmpty()) {
+            println("해당 번호로 예약된 정보가 없습니다")
+        } else {
+            println("[예약자 목록 - 조회 결과]")
+            for (result in searchResult) {
+                println("이름: ${result.name}, 휴대폰뒷번혼: ${result.phoneSuffix}, 방 호실: ${result.roomNumber}, 체크인날짜: ${result.checkIn}, 체크아웃날짜: ${result.checkout} ")
+                println("나의 초기머니: ${result.initialMoney}원")
+                println("호텔 예약비로 인해 빠져나간 금액: ${result.hotelReservationFee}원")
+                val reminMoney = result.initialMoney - result.hotelReservationFee
+                println("남은 나의머니: ${reminMoney}")
+            }
+        }
+    }
 }
